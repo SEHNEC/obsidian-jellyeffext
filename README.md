@@ -38,12 +38,6 @@ No long inline `style="..."` attributes are generated — only short, semantic c
 
 ## Installation
 
-### From the Obsidian Community Plugins (coming soon)
-
-1. Open **Settings → Community Plugins → Browse**
-2. Search for **JellyEffext**
-3. Click **Install**, then **Enable**
-
 ### Manual Installation
 
 1. Download the latest release (`main.js`, `manifest.json`, `styles.css`)
