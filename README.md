@@ -45,8 +45,9 @@ No long inline `style="..."` attributes are generated — only short, semantic c
 ### Manual Installation
 
 1. Download the latest release (`main.js`, `manifest.json`, `styles.css`)
-2. Copy them to `<your-vault>/.obsidian/plugins/jellyeffext/`
-3. Reload Obsidian and enable the plugin in **Settings → Community Plugins**
+2. In Obsidian, go to **Settings → Community Plugins → Installed Plugins** and click the folder icon to open the plugins folder
+3. Create a `jellyeffext` folder inside and drop the three files into it
+4. Reload Obsidian and enable the plugin in **Settings → Community Plugins**
 
 ### From Source
 
