@@ -1,0 +1,10 @@
+{
+  "id": "jellyeffext",
+  "name": "JellyEffext",
+  "version": "1.5.0",
+  "minAppVersion": "1.5.0",
+  "description": "A floating, Notion-style rich text toolbar for Obsidian Live Preview — bold, italic, underline, strikethrough, inline code, font sizes, text colors, and highlights.",
+  "author": "SEHNEC",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}

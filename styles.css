@@ -1,0 +1,387 @@
+/* ── Rich Text Toolbar ─────────────────────────────────────────── */
+/* Toolbar container                                                     */
+/* ─────────────────────────────────────────────────────────────────── */
+
+.rt-toolbar-wrapper {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.rt-toolbar-wrapper.rt-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.rt-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  background: var(--background-primary, #ffffff);
+  border: 1px solid var(--background-modifier-border, #e0e0e0);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Divider between toolbar groups */
+.rt-toolbar-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--background-modifier-border, #e0e0e0);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────── */
+
+.rt-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-normal, #333333);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+  flex-shrink: 0;
+  line-height: 1;
+  padding: 0;
+}
+
+.rt-btn:hover {
+  background: var(--background-modifier-hover, #f0f0f0);
+}
+
+.rt-btn:active {
+  background: var(--background-modifier-active, #e0e0e0);
+}
+
+.rt-btn.rt-active {
+  background: var(--interactive-accent, #7c3aed);
+  color: var(--text-on-accent, #ffffff);
+}
+
+.rt-btn svg {
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+}
+
+/* Bold button styling */
+.rt-btn[data-action="bold"] {
+  font-weight: 700;
+}
+
+/* Italic button styling */
+.rt-btn[data-action="italic"] {
+  font-style: italic;
+}
+
+/* Strikethrough button */
+.rt-btn[data-action="strikethrough"] {
+  text-decoration: line-through;
+}
+
+/* Underline button */
+.rt-btn[data-action="underline"] {
+  text-decoration: underline;
+}
+
+/* ── Dropdown Select ───────────────────────────────────────────── */
+
+.rt-select-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.rt-select {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 28px;
+  padding: 0 24px 0 8px;
+  border: 1px solid var(--background-modifier-border, #e0e0e0);
+  border-radius: 5px;
+  background: var(--background-primary, #ffffff);
+  color: var(--text-normal, #333333);
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.12s ease;
+}
+
+.rt-select:hover {
+  border-color: var(--interactive-accent, #7c3aed);
+}
+
+.rt-select:focus {
+  border-color: var(--interactive-accent, #7c3aed);
+  box-shadow: 0 0 0 1px var(--interactive-accent, #7c3aed);
+}
+
+.rt-select-wrap::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--text-muted, #999999);
+  pointer-events: none;
+}
+
+/* ── Color Swatch ──────────────────────────────────────────────── */
+
+.rt-color-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.rt-color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.12s ease, transform 0.12s ease;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.rt-color-swatch:hover {
+  transform: scale(1.15);
+  border-color: var(--interactive-accent, #7c3aed);
+}
+
+.rt-color-swatch.rt-active {
+  border-color: var(--text-normal, #333333);
+}
+
+/* Special swatch: "more colors" picker trigger */
+.rt-color-swatch.rt-color-more {
+  background: conic-gradient(
+    red, yellow, lime, cyan, blue, magenta, red
+  ) !important;
+  border-radius: 50%;
+}
+
+/* Special swatch: clear / none */
+.rt-color-swatch.rt-color-none {
+  background: transparent !important;
+  position: relative;
+}
+
+.rt-color-swatch.rt-color-none::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 1.5px;
+  background: var(--text-muted, #999999);
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* ── Fixed Toolbar Mode ────────────────────────────────────────── */
+
+.rt-toolbar-wrapper.rt-fixed-top {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  opacity: 1;
+  transform: none;
+  padding: 4px 0;
+  margin-bottom: 8px;
+}
+
+.rt-toolbar-wrapper.rt-fixed-top .rt-toolbar {
+  margin: 0 auto;
+  width: fit-content;
+}
+
+.rt-toolbar-wrapper.rt-fixed-bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  opacity: 1;
+  transform: none;
+  padding: 4px 0;
+  margin-top: 8px;
+}
+
+.rt-toolbar-wrapper.rt-fixed-bottom .rt-toolbar {
+  margin: 0 auto;
+  width: fit-content;
+}
+
+/* ── Color Picker Dialog Overlay ───────────────────────────────── */
+
+.rt-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rt-picker-dialog {
+  background: var(--background-primary, #ffffff);
+  border: 1px solid var(--background-modifier-border, #e0e0e0);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  min-width: 260px;
+}
+
+.rt-picker-dialog h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-normal, #333333);
+}
+
+.rt-picker-dialog input[type="color"] {
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--background-modifier-border, #e0e0e0);
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--background-primary, #ffffff);
+  margin-bottom: 12px;
+}
+
+.rt-picker-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.rt-picker-actions button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.rt-picker-cancel {
+  background: var(--background-modifier-hover, #f0f0f0);
+  color: var(--text-normal, #333333);
+}
+
+.rt-picker-cancel:hover {
+  background: var(--background-modifier-active, #e0e0e0);
+}
+
+.rt-picker-apply {
+  background: var(--interactive-accent, #7c3aed);
+  color: var(--text-on-accent, #ffffff);
+}
+
+.rt-picker-apply:hover {
+  filter: brightness(1.1);
+}
+
+/* ── Custom Size Input ─────────────────────────────────────────── */
+
+.rt-custom-size {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--background-modifier-border, #e0e0e0);
+}
+
+.rt-custom-size input {
+  width: 70px;
+  padding: 4px 8px;
+  border: 1px solid var(--background-modifier-border, #e0e0e0);
+  border-radius: 5px;
+  font-size: 13px;
+  color: var(--text-normal, #333333);
+  background: var(--background-primary, #ffffff);
+  outline: none;
+}
+
+.rt-custom-size input:focus {
+  border-color: var(--interactive-accent, #7c3aed);
+}
+
+.rt-custom-size span {
+  font-size: 12px;
+  color: var(--text-muted, #999999);
+}
+
+/* ── Dark Theme Adjustments ────────────────────────────────────── */
+
+.theme-dark .rt-toolbar {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.theme-dark .rt-picker-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.theme-dark .rt-color-swatch.rt-active {
+  border-color: var(--text-normal, #e0e0e0);
+}
+
+/* ── Formatting CSS Classes (dynamic classes injected via JS) ──── */
+/* These are also generated programmatically based on settings.     */
+/* Static fallbacks for the most common values:                     */
+
+.rt-underline {
+  text-decoration: underline;
+}
+
+/* Font size fallbacks */
+.rt-size-12 { font-size: 12px; }
+.rt-size-14 { font-size: 14px; }
+.rt-size-16 { font-size: 16px; }
+.rt-size-18 { font-size: 18px; }
+.rt-size-20 { font-size: 20px; }
+.rt-size-24 { font-size: 24px; }
+.rt-size-32 { font-size: 32px; }
+
+/* Color fallbacks */
+.rt-color-black  { color: #000000; }
+.rt-color-red    { color: #e53935; }
+.rt-color-orange { color: #fb8c00; }
+.rt-color-yellow { color: #fdd835; }
+.rt-color-green  { color: #43a047; }
+.rt-color-blue   { color: #1e88e5; }
+.rt-color-purple { color: #8e24aa; }
+.rt-color-gray   { color: #757575; }
+
+/* Highlight fallbacks */
+.rt-bg-yellow { background-color: #fff59d; }
+.rt-bg-green  { background-color: #c8e6c9; }
+.rt-bg-blue   { background-color: #bbdefb; }
+.rt-bg-pink   { background-color: #f8bbd0; }
+.rt-bg-purple { background-color: #e1bee7; }
+
+/* ── Dark theme overrides for colors ───────────────────────────── */
+
+.theme-dark .rt-color-black  { color: #e0e0e0; }
+.theme-dark .rt-color-yellow { color: #ffee58; }
+.theme-dark .rt-color-gray   { color: #9e9e9e; }
