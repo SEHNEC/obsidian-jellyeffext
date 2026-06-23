@@ -1,5 +1,8 @@
 # JellyEffext
 
+<img width="827" height="438" alt="Screen Shot Preview AM" src="https://github.com/user-attachments/assets/1a6ddfd8-ce61-465c-9989-8d0d66a6e803" />
+
+
 A floating, Notion-style rich text toolbar for Obsidian's Live Preview mode.
 
 Select any text and a clean floating toolbar appears — bold, italic, underline, strikethrough, inline code, font sizes, text colors, and highlights — without leaving your keyboard flow.
