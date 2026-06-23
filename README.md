@@ -1,7 +1,8 @@
 # JellyEffext
 
-<img width="827" height="438" alt="Screen Shot Preview AM" src="https://github.com/user-attachments/assets/1a6ddfd8-ce61-465c-9989-8d0d66a6e803" />
+**English** | [中文](README.zh-CN.md)
 
+<img width="827" height="438" alt="Screen Shot Preview AM" src="https://github.com/user-attachments/assets/1a6ddfd8-ce61-465c-9989-8d0d66a6e803" />
 
 A floating, Notion-style rich text toolbar for Obsidian's Live Preview mode.
 
