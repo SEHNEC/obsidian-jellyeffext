@@ -62,6 +62,12 @@ export class Toolbar {
 		this.owner = owner;
 		this.wrapper = document.body.createDiv("rt-toolbar-wrapper");
 		this.toolbar = this.wrapper.createDiv("rt-toolbar");
+		this.toolbar.addEventListener("mousedown", (e) => {
+			const target = e.target as HTMLElement;
+			if (!target.closest(".rt-select-wrap")) {
+				this.closeDropdowns();
+			}
+		});
 		this.hide();
 	}
 
@@ -132,26 +138,41 @@ export class Toolbar {
 
 	private renderFontSize(): void {
 		const wrap = this.toolbar.createDiv("rt-select-wrap");
-		const select = wrap.createEl("select", { cls: "rt-select" });
+		const btn = wrap.createEl("button", { cls: "rt-select-btn", text: "Size" });
+		const dropdown = wrap.createDiv("rt-select-dropdown");
+		dropdown.style.display = "none";
 
-		select.createEl("option", { text: "Size", attr: { value: "", disabled: "true", selected: "true" } });
+		const options = [
+			...this.owner.settings.fontSizes.map((s) => ({ label: `${s}px`, value: String(s) })),
+			{ label: "Custom...", value: "custom" },
+		];
 
-		for (const size of this.owner.settings.fontSizes) {
-			select.createEl("option", { text: `${size}px`, attr: { value: String(size) } });
+		for (const opt of options) {
+			const item = dropdown.createDiv({ cls: "rt-select-option", text: opt.label });
+			item.addEventListener("mousedown", (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				this.closeDropdowns();
+				if (opt.value === "custom") {
+					this.owner.showCustomSizeDialog();
+				} else {
+					this.owner.applyFontSize(parseInt(opt.value, 10));
+				}
+			});
 		}
 
-		select.createEl("option", { text: "Custom...", attr: { value: "custom" } });
+		btn.addEventListener("mousedown", (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			const isOpen = dropdown.style.display !== "none";
+			this.closeDropdowns();
+			if (!isOpen) dropdown.style.display = "block";
+		});
+	}
 
-		select.addEventListener("mousedown", (e) => e.stopPropagation());
-
-		select.addEventListener("change", () => {
-			const val = select.value;
-			select.selectedIndex = 0;
-			if (val === "custom") {
-				this.owner.showCustomSizeDialog();
-			} else if (val) {
-				this.owner.applyFontSize(parseInt(val, 10));
-			}
+	private closeDropdowns(): void {
+		this.toolbar.querySelectorAll<HTMLElement>(".rt-select-dropdown").forEach((d) => {
+			d.style.display = "none";
 		});
 	}
 
@@ -231,6 +252,7 @@ export class Toolbar {
 	}
 
 	hide(): void {
+		this.closeDropdowns();
 		this.wrapper.removeClass("rt-visible");
 	}
 
