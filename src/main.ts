@@ -13,8 +13,10 @@ import {
 	parseSpanThroughMarkdown,
 	splitClasses,
 } from "./formatting";
+
 import { Toolbar, ToolbarItem } from "./toolbar";
 import { RichTextToolbarSettingTab } from "./settings-tab";
+import { registerSelectionFrame, showFrame, clearFrame, tryAutoSelectSpan } from "./selection-frame";
 
 export default class RichTextToolbarPlugin extends Plugin {
 	settings: RichTextToolbarSettings;
@@ -36,7 +38,14 @@ export default class RichTextToolbarPlugin extends Plugin {
 		this.registerKeyboardShortcuts();
 
 		this.registerDomEvent(document, "mouseup", () => {
-			setTimeout(() => this.onSelectionChanged(), 50);
+			setTimeout(() => {
+				const editor = this.getEditor();
+				if (editor) {
+					const cm = this.getCodeMirrorView(editor);
+					if (cm) tryAutoSelectSpan(cm);
+				}
+				this.onSelectionChanged();
+			}, 50);
 		});
 
 		this.registerDomEvent(document, "keyup", (e: KeyboardEvent) => {
@@ -69,9 +78,11 @@ export default class RichTextToolbarPlugin extends Plugin {
 			this.app.workspace.on("active-leaf-change", () => {
 				this.toolbar?.hide();
 				this.updateFixedToolbar();
+				this.tryRegisterSelectionFrame();
 			})
 		);
 
+		this.tryRegisterSelectionFrame();
 		this.addSettingTab(new RichTextToolbarSettingTab(this.app, this));
 		this.updateFixedToolbar();
 
@@ -156,6 +167,63 @@ export default class RichTextToolbarPlugin extends Plugin {
 	}
 
 	// ── Editor Helpers ────────────────────────────────────────────
+
+	private tryRegisterSelectionFrame(): void {
+		const editor = this.getEditor();
+		if (!editor) return;
+		const cm = this.getCodeMirrorView(editor);
+		if (cm) registerSelectionFrame(cm);
+	}
+
+	private flashFrame(): void {
+		if (!this.savedSelection) return;
+		const editor = this.getEditor();
+		if (!editor) return;
+		const cm = this.getCodeMirrorView(editor);
+		if (cm) showFrame(cm, this.savedSelection.from, this.savedSelection.to);
+	}
+
+	private clearFrameNow(): void {
+		const editor = this.getEditor();
+		if (!editor) return;
+		const cm = this.getCodeMirrorView(editor);
+		if (cm) clearFrame(cm);
+	}
+
+	// Expands selection to enclosing rt-span if current selection doesn't already contain one
+	private expandSelectionToSpan(editor: Editor): string {
+		const sel = editor.getSelection();
+		if (parseSpan(sel)) return sel; // already a full span
+
+		const cm = this.getCodeMirrorView(editor);
+		if (!cm) return sel;
+
+		const pos = editor.posToOffset(editor.getCursor("from"));
+		const doc: string = cm.state.doc.toString();
+
+		let searchFrom = pos;
+		while (searchFrom >= 0) {
+			const spanStart = doc.lastIndexOf("<span", searchFrom);
+			if (spanStart === -1) break;
+			const tagClose = doc.indexOf(">", spanStart);
+			if (tagClose === -1) break;
+			const tag = doc.slice(spanStart, tagClose + 1);
+			if (tag.includes("rt-")) {
+				if (pos > tagClose) {
+					const spanEnd = doc.indexOf("</span>", tagClose);
+					if (spanEnd !== -1 && pos <= spanEnd) {
+						const from = editor.offsetToPos(spanStart);
+						const to = editor.offsetToPos(spanEnd + 7);
+						editor.setSelection(from, to);
+						return editor.getSelection();
+					}
+				}
+				break;
+			}
+			searchFrom = spanStart - 1;
+		}
+		return sel;
+	}
 
 	private getEditor(): Editor | null {
 		return getEditor(this.app);
@@ -402,7 +470,7 @@ export default class RichTextToolbarPlugin extends Plugin {
 	removeTextColor(): void {
 		const editor = this.getEditor();
 		if (!editor) return;
-		const selection = this.getSelectionWithFallback(editor);
+		const selection = this.expandSelectionToSpan(editor);
 		if (!selection) return;
 		const parsed = parseSpanThroughMarkdown(selection);
 		if (!parsed) return;
@@ -410,6 +478,7 @@ export default class RichTextToolbarPlugin extends Plugin {
 		const classes = splitClasses(span.classes).filter((c) => !c.startsWith("rt-color-"));
 		this.replaceWithSpanWrapped(editor, span.inner, classes, wrappers);
 		this.afterFormat(editor);
+		this.clearFrameNow();
 	}
 
 	// ── Formatting: Highlight Color ───────────────────────────────
@@ -435,7 +504,7 @@ export default class RichTextToolbarPlugin extends Plugin {
 	removeHighlightColor(): void {
 		const editor = this.getEditor();
 		if (!editor) return;
-		const selection = this.getSelectionWithFallback(editor);
+		const selection = this.expandSelectionToSpan(editor);
 		if (!selection) return;
 		const parsed = parseSpanThroughMarkdown(selection);
 		if (!parsed) return;
@@ -443,6 +512,7 @@ export default class RichTextToolbarPlugin extends Plugin {
 		const classes = splitClasses(span.classes).filter((c) => !c.startsWith("rt-bg-"));
 		this.replaceWithSpanWrapped(editor, span.inner, classes, wrappers);
 		this.afterFormat(editor);
+		this.clearFrameNow();
 	}
 
 	// ── Formatting: Clear ─────────────────────────────────────────
@@ -450,12 +520,13 @@ export default class RichTextToolbarPlugin extends Plugin {
 	clearFormatting(): void {
 		const editor = this.getEditor();
 		if (!editor) return;
-		const selection = this.getSelectionWithFallback(editor);
+		const selection = this.expandSelectionToSpan(editor);
 		if (!selection) return;
 		const { inner } = parseMarkdownWrappers(selection);
 		const span = parseSpan(inner);
 		editor.replaceSelection(span ? span.inner : inner);
 		this.afterFormat(editor);
+		this.clearFrameNow();
 	}
 
 	// ── Color Picker Dialogs ──────────────────────────────────────
@@ -580,5 +651,6 @@ export default class RichTextToolbarPlugin extends Plugin {
 	private afterFormat(editor: Editor): void {
 		editor.focus();
 		this.toolbar?.hide();
+		this.flashFrame();
 	}
 }
