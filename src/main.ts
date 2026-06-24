@@ -201,6 +201,7 @@ export default class RichTextToolbarPlugin extends Plugin {
 		const pos = editor.posToOffset(editor.getCursor("from"));
 		const doc: string = cm.state.doc.toString();
 
+		// Try rt- span
 		let searchFrom = pos;
 		while (searchFrom >= 0) {
 			const spanStart = doc.lastIndexOf("<span", searchFrom);
@@ -222,6 +223,27 @@ export default class RichTextToolbarPlugin extends Plugin {
 			}
 			searchFrom = spanStart - 1;
 		}
+
+		// Try markdown wrappers on same line
+		const lineStart = doc.lastIndexOf("\n", pos - 1) + 1;
+		const lineEndRaw = doc.indexOf("\n", pos);
+		const lineEnd = lineEndRaw === -1 ? doc.length : lineEndRaw;
+		const line = doc.slice(lineStart, lineEnd);
+		const localPos = pos - lineStart;
+
+		for (const m of ["**", "~~", "`", "*"]) {
+			const openIdx = line.lastIndexOf(m, localPos - 1);
+			if (openIdx === -1) continue;
+			if (m === "*" && (line[openIdx - 1] === "*" || line[openIdx + 1] === "*")) continue;
+			const closeIdx = line.indexOf(m, localPos);
+			if (closeIdx === -1 || closeIdx === openIdx) continue;
+			if (m === "*" && (line[closeIdx - 1] === "*" || line[closeIdx + 1] === "*")) continue;
+			const from = editor.offsetToPos(lineStart + openIdx);
+			const to = editor.offsetToPos(lineStart + closeIdx + m.length);
+			editor.setSelection(from, to);
+			return editor.getSelection();
+		}
+
 		return sel;
 	}
 

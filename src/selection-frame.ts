@@ -42,44 +42,65 @@ export function clearFrame(cm: EditorView): void {
 	cm.dispatch({ effects: setFrameEffect.of(null) });
 }
 
-// ── Auto-select span on click ──────────────────────────────────────
+// ── Auto-select formatted range on click ──────────────────────────
 
 export function tryAutoSelectSpan(cm: EditorView): void {
 	const sel = cm.state.selection.main;
-	if (!sel.empty) return; // Already has a real selection
+	if (!sel.empty) return;
 
 	const pos = sel.head;
 	const doc = cm.state.doc.toString();
 
-	// Walk backwards to find the nearest opening <span with rt- class
+	// 1. Try rt- span
 	let searchFrom = pos;
 	while (searchFrom >= 0) {
 		const spanStart = doc.lastIndexOf("<span", searchFrom);
-		if (spanStart === -1) return;
-
+		if (spanStart === -1) break;
 		const tagClose = doc.indexOf(">", spanStart);
-		if (tagClose === -1) return;
-
+		if (tagClose === -1) break;
 		const tag = doc.slice(spanStart, tagClose + 1);
-
-		// Only care about our rt- spans
 		if (tag.includes("rt-")) {
-			// Cursor must be after the closing > of the opening tag
 			if (pos > tagClose) {
 				const spanEnd = doc.indexOf("</span>", tagClose);
-				if (spanEnd === -1) return;
-				// Cursor must be before </span>
-				if (pos <= spanEnd) {
-					// Select the full span including tags so formatting ops can parse it
-					const from = spanStart;
-					const to = spanEnd + 7; // length of </span>
-					cm.dispatch({ selection: { anchor: from, head: to } });
+				if (spanEnd !== -1 && pos <= spanEnd) {
+					cm.dispatch({ selection: { anchor: spanStart, head: spanEnd + 7 } });
+					return;
 				}
 			}
-			return;
+			break;
+		}
+		searchFrom = spanStart - 1;
+	}
+
+	// 2. Try markdown wrappers — check on the same line only
+	const lineStart = doc.lastIndexOf("\n", pos - 1) + 1;
+	const lineEndRaw = doc.indexOf("\n", pos);
+	const lineEnd = lineEndRaw === -1 ? doc.length : lineEndRaw;
+	const line = doc.slice(lineStart, lineEnd);
+	const localPos = pos - lineStart;
+
+	// Order matters: check ** before * to avoid partial match
+	const markers = ["**", "~~", "`", "*"];
+	for (const m of markers) {
+		const openIdx = line.lastIndexOf(m, localPos - 1);
+		if (openIdx === -1) continue;
+
+		// For single *, ensure it's not part of **
+		if (m === "*") {
+			if (line[openIdx - 1] === "*" || line[openIdx + 1] === "*") continue;
 		}
 
-		// Not our span, keep searching further back
-		searchFrom = spanStart - 1;
+		const closeIdx = line.indexOf(m, localPos);
+		if (closeIdx === -1 || closeIdx === openIdx) continue;
+
+		// For single *, ensure close is not part of **
+		if (m === "*") {
+			if (line[closeIdx - 1] === "*" || line[closeIdx + 1] === "*") continue;
+		}
+
+		const from = lineStart + openIdx;
+		const to = lineStart + closeIdx + m.length;
+		cm.dispatch({ selection: { anchor: from, head: to } });
+		return;
 	}
 }
