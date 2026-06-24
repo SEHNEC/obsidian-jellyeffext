@@ -238,19 +238,22 @@ export class Toolbar {
 		return this.wrapper.hasClass("rt-visible");
 	}
 
-	setPosition(top: number, left: number): void {
+	setPosition(anchor: { top: number; bottom: number; centerX: number }): void {
 		const rect = this.toolbar.getBoundingClientRect();
 		const vw = window.innerWidth;
 		const vh = window.innerHeight;
+		const gap = 8;
+		const margin = 4;
 
-		let finalTop = top - rect.height - 8;
-		if (finalTop < 8) finalTop = top + 24;
-		if (finalTop < 4) finalTop = 4;
-		if (finalTop + rect.height > vh - 4) finalTop = vh - rect.height - 4;
+		// Prefer placing above the selection's top; fall back to below its bottom.
+		let finalTop = anchor.top - rect.height - gap;
+		if (finalTop < margin) finalTop = anchor.bottom + gap;
+		if (finalTop + rect.height > vh - margin) finalTop = vh - rect.height - margin;
+		if (finalTop < margin) finalTop = margin;
 
-		let finalLeft = left - rect.width / 2;
-		if (finalLeft < 4) finalLeft = 4;
-		if (finalLeft + rect.width > vw - 4) finalLeft = vw - rect.width - 4;
+		let finalLeft = anchor.centerX - rect.width / 2;
+		if (finalLeft < margin) finalLeft = margin;
+		if (finalLeft + rect.width > vw - margin) finalLeft = vw - rect.width - margin;
 
 		this.wrapper.style.top = `${finalTop}px`;
 		this.wrapper.style.left = `${finalLeft}px`;

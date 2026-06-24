@@ -216,11 +216,22 @@ export default class RichTextToolbarPlugin extends Plugin {
 		const cm = this.getCodeMirrorView(editor);
 		if (!cm || typeof cm.coordsAtPos !== "function") return;
 
-		const offset = editor.posToOffset(editor.getCursor("to"));
-		const coords = cm.coordsAtPos(offset);
-		if (!coords) return;
+		const fromOffset = editor.posToOffset(editor.getCursor("from"));
+		const toOffset = editor.posToOffset(editor.getCursor("to"));
+		const fromCoords = cm.coordsAtPos(fromOffset);
+		const toCoords = cm.coordsAtPos(toOffset);
+		if (!fromCoords || !toCoords) return;
 
-		this.toolbar?.setPosition(coords.top, coords.left);
+		const sameLine = Math.abs(fromCoords.top - toCoords.top) < 2;
+		const centerX = sameLine
+			? (fromCoords.left + toCoords.left) / 2
+			: fromCoords.left;
+
+		this.toolbar?.setPosition({
+			top: fromCoords.top,
+			bottom: toCoords.bottom,
+			centerX,
+		});
 		this.toolbar?.show();
 	}
 
