@@ -56,10 +56,9 @@ npm install
 npm run build
 ```
 
-1. 新建一个名为 `jellyeffext` 的文件夹
-2. 将 `main.js`、`manifest.json` 和 `styles.css` 复制进去
-3. 打开 Obsidian，进入 **设置 → 第三方插件**，点击文件夹图标打开插件目录
-4. 将 `jellyeffext` 文件夹放入其中，重启 Obsidian 并启用 **JellyEffext**
+1. 打开 Obsidian，进入 **设置 → 第三方插件**，点击文件夹图标打开插件目录
+2. 将整个 `jellyeffext` 文件夹拖入其中
+3. 重启 Obsidian，在 **设置 → 第三方插件** 中启用 **JellyEffext**
 
 ## 设置选项
 

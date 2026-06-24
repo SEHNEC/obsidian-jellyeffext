@@ -58,10 +58,9 @@ npm install
 npm run build
 ```
 
-1. Create a new folder named `jellyeffext`
-2. Copy `main.js`, `manifest.json`, and `styles.css` into it
-3. In Obsidian, go to **Settings → Community Plugins** and click the folder icon to open the plugins folder
-4. Place the `jellyeffext` folder inside it, then restart Obsidian and enable **JellyEffext**
+1. In Obsidian, go to **Settings → Community Plugins** and click the folder icon to open the plugins folder
+2. Drop the entire `jellyeffext` folder in
+3. Restart Obsidian and enable **JellyEffext**
 
 ## Settings
 
