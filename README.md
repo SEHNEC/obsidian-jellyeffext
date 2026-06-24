@@ -52,13 +52,16 @@ No long inline `style="..."` attributes are generated — only short, semantic c
 ### From Source
 
 ```bash
-git clone <repo-url> jellyeffext
+git clone https://github.com/SEHNEC/obsidian-jellyeffext jellyeffext
 cd jellyeffext
 npm install
 npm run build
 ```
 
-Then copy the resulting `main.js`, `manifest.json`, and `styles.css` into `<your-vault>/.obsidian/plugins/jellyeffext/`.
+1. Create a new folder named `jellyeffext`
+2. Copy `main.js`, `manifest.json`, and `styles.css` into it
+3. In Obsidian, go to **Settings → Community Plugins** and click the folder icon to open the plugins folder
+4. Place the `jellyeffext` folder inside it, then restart Obsidian and enable **JellyEffext**
 
 ## Settings
 
